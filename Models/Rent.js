@@ -5,15 +5,18 @@ const rentSchema = new mongoose.Schema({
         ref: 'User',
         require: true
     },
-    house: {
+    house: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'House',
         require: true
     },
-    rentedStatus: {
-        type: Boolean,
-        default: false
+    {
+        rentedStatus: {
+            type: Boolean,
+            default: false
+        }
     }
+    ],
 
 }, { timestamps: true });
 
