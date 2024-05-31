@@ -228,7 +228,7 @@ const forgotPassword = async (req, res) => {
             });
         }
         const token = jwt.sign({
-            id: admin.Id,
+            id: admin._id,
             email: admin.email
         }, process.env.TOKEN)
 
