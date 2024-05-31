@@ -18,11 +18,14 @@ const userSchema = new mongoose.Schema({
         require: true,
         unique: true
     },
-    phoneNumber: {
+    phoneno: {
         type: String,
         require: true
     },
-    is
+    verified: {
+        type: Boolean,
+        default: false
+    }
 }, {timestamps: true });
 
 const User = mongoose.model('User', userSchema);
