@@ -181,7 +181,50 @@ const forgotPassword = async (req, res) => {
         res.status(500).json({
             status: 'Failed',
             message: error.message
-           });  
+        });  
+    }
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        const { newPassword, confirmPassword } = req.body;
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found'
+            });
+        }
+        
+        if (newPassword !== confirmPassword) {
+            return res.status(403).json({
+                message: 'There is a difference in both password'
+            });
+        }
+        
+        const saltPassword = bcrypt.genSaltSync(10);
+        const hashPassword = bcrypt.hashSync(newPassword, saltPassword);
+
+        const updatePassword = await User.findByIdAndUpdate(req.params.id, {
+            password: hashPassword
+        });
+
+        await user.save();
+
+        res.status(200).json({
+            message: 'Password updated successfully',
+            data: updatePassword
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'Failed',
+            message: error.message
+        });
     }
 }
-module.exports = { user, verify, loginUser, changePassword, forgotPassword }
+module.exports = { user, 
+    verify, 
+    loginUser,
+     changePassword, 
+     forgotPassword, 
+     resetPassword    
+}
