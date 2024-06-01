@@ -1,6 +1,4 @@
 const House = require('../Models/House');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const Admin = require('../Models/Admin');
 
 const house = async (req, res) => {
