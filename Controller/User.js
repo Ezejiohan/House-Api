@@ -85,7 +85,7 @@ const loginUser = async (req, res) => {
                     id: user._id,
                     email: user.email,
                     username: user.username
-                }, secretKey, {expiresIn: "45 mins"});
+                }, process.env.TOKEN, {expiresIn: "45 mins"});
 
                 const result = {
                     id: user._id,
@@ -163,7 +163,7 @@ const forgotPassword = async (req, res) => {
         const token = jwt.sign({
             id: user._id,
             email: user.email
-        }, secretKey)
+        }, process.env.TOKEN)
 
         const passwordChangeLink = `${req.protocol}://${req.get("host")}/api/user/change_password/${user._id}/${token}`;
         const message = `Click this link: ${passwordChangeLink} to set a new password`;

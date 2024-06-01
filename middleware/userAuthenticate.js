@@ -10,7 +10,7 @@ const userAuthenticate = async (req, res, next) => {
             });
         }
         const token = hasAuthorization.split(' ')[1];
-        const decodedToken = jwt.verify(token, secretKey);
+        const decodedToken = jwt.verify(token, process.env.TOKEN);
 
         const user = await User.findById(decodedToken.id);
         if (!user) {
