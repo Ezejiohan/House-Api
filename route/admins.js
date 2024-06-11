@@ -20,11 +20,12 @@ route.get("/", (req, res) => {
 route.post("/api/admins", admin);
 route.post("/api/loginadmins", loginAdmin);
 route.get("/api/admins/:id", verify);
-route.put("/api/admins/:id", authenticate, updateAdmin);
-route.get("/api/admins", authenticate, adminPool);
-route.delete("/api/admins/:username", authenticate, deactivateAdmin);
-route.patch("/api/admins", authenticate, changePassword);
+route.patch("/api/admins", changePassword);
 route.post("/api/admins/forgotPassword", forgotPassword);
-route.patch("/api/admins/change_password/:id/:token", restPassword)
+route.patch("/api/admins/change_password/:id/:token", restPassword);
+route.use(authenticate);
+route.put("/api/admins/:id", updateAdmin);
+route.get("/api/admins",  adminPool);
+route.delete("/api/admins/:username", deactivateAdmin);
 
 module.exports = { route }
