@@ -11,4 +11,4 @@ const validation = (Schema) => async (req, res, next) => {
     }
 };
 
-module.exports = validation;
+module.exports = { validation };

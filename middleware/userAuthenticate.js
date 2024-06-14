@@ -6,7 +6,7 @@ const userAuthenticate = async (req, res, next) => {
         const hasAuthorization = req.headers.authorization;
         if (!hasAuthorization) {
             return res.status(400).json({
-                message: "Authorization token not found"
+                message: "Authorization token not founds"
             });
         }
         const token = hasAuthorization.split(' ')[1];

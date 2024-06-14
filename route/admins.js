@@ -23,7 +23,7 @@ route.get("/api/admins/:id", verify);
 route.patch("/api/admins", changePassword);
 route.post("/api/admins/forgotPassword", forgotPassword);
 route.patch("/api/admins/change_password/:id/:token", restPassword);
-route.use(authenticate);
+//route.use(authenticate);
 route.put("/api/admins/:id", updateAdmin);
 route.get("/api/admins",  adminPool);
 route.delete("/api/admins/:username", deactivateAdmin);

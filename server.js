@@ -7,18 +7,14 @@ const { userRoute } = require('./route/users');
 const app = express();
 require('./database/database');
 
-const validation = require("./middleware/validationMiddleware");
-const userSchema = require("./validation/userValidation");
+
 
 const PORT = 7000;
 app.use(express.json());
 app.use('/', route);
-app.use('/', House);
+// app.use('/', House);
 app.use('/', userRoute);
 
-app.post("/user", validation(userSchema), (req, res) => {
-    res.status(200).send(req.body)
-});
 
 
 app.listen(process.env.PORT, () => {

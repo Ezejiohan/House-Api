@@ -1,9 +1,11 @@
 const User = require("../Models/User");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
+const userSchema = require('../validation/userValidation');
 const user = async (req, res) => {
     try {
+        await userSchema.validate(req.body, { abortEarly: false });
+
         const saltPassword = bcrypt.genSaltSync(10);
         const hashPassword = bcrypt.hashSync(req.body.password, saltPassword);
 
