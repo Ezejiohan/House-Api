@@ -2,9 +2,14 @@ const Admin = require('../Models/Admin');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { sendEmail } = require('../utilies/nodemailer');
+const adminSchema = require('../validation/adminValidation');
+const loginAdminSchema = require('../validation/loginAdminValidation');
+
 
 const admin = async (req, res) => {
     try {
+        await adminSchema.validate(req.body, { abortEarly: false });
+
         const saltPassword = bcrypt.genSaltSync(10);
         const hashPassword = bcrypt.hashSync(req.body.password, saltPassword);
 
@@ -68,6 +73,7 @@ const verify = async (req, res) => {
 
 const loginAdmin = async (req, res) => {
     try {
+        await loginAdminSchema.validate(req.body, { abortEarly: false });
        const loginRequest = {
         email: req.body.email,
         password: req.body.password
