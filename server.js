@@ -7,8 +7,6 @@ const { userRoute } = require('./route/users');
 const app = express();
 require('./database/database');
 
-
-
 const PORT = 7000;
 app.use(express.json());
 app.use('/', route);

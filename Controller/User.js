@@ -2,6 +2,7 @@ const User = require("../Models/User");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userSchema = require('../validation/userValidation');
+const loginSchema = require('../validation/loginValidation');
 const user = async (req, res) => {
     try {
         await userSchema.validate(req.body, { abortEarly: false });
@@ -67,6 +68,8 @@ const verify = async (req, res) => {
 
 const loginUser = async (req, res) => {
     try {
+        await loginSchema.validate(req.body, { abortEarly: false });
+
         const loginRequest = {
             email: req.body.email,
             password: req.body.password
