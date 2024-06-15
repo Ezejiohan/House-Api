@@ -3,6 +3,9 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userSchema = require('../validation/userValidation');
 const loginSchema = require('../validation/loginValidation');
+const userPasswordChangeSchema = require('../validation/userPasswordChange');
+const userForgotPasswordSchema = require('../validation/userForgetPassword');
+
 const user = async (req, res) => {
     try {
         await userSchema.validate(req.body, { abortEarly: false });
@@ -114,6 +117,8 @@ const loginUser = async (req, res) => {
 
 const changePassword = async (req, res) => {
     try {
+        await userPasswordChangeSchema.validate(req.body, { abortEarly: false });
+
         const { oldPassword, newPassword } = req.body;
         const user = await User.findOne({ email: req.user.email });
        
@@ -159,6 +164,8 @@ const changePassword = async (req, res) => {
 
 const forgotPassword = async (req, res) => {
     try {
+        await userForgotPasswordSchema.validate(req.body, { abortEarly: false });
+
         const user = await User.findOne({ email: req.body.email });
         if (!user) {
             return res.status(404).json({
