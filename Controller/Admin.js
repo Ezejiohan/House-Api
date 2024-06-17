@@ -4,7 +4,8 @@ const jwt = require('jsonwebtoken');
 const { sendEmail } = require('../utilies/nodemailer');
 const adminSchema = require('../validation/adminValidation');
 const loginAdminSchema = require('../validation/loginAdminValidation');
-
+const adminChangePasswordSchema = require('../validation/adminChangePassword');
+const adminForgetPasswordSchema = require('../validation/adminForgetPassword');
 
 const admin = async (req, res) => {
     try {
@@ -35,7 +36,7 @@ const admin = async (req, res) => {
                 message: "Admin created Successfully",
                 data: newAdmin
             });
-        }        
+        }
     } catch (error) {
         res.status(500).json({
             status: 'Failed',
@@ -74,16 +75,17 @@ const verify = async (req, res) => {
 const loginAdmin = async (req, res) => {
     try {
         await loginAdminSchema.validate(req.body, { abortEarly: false });
-       const loginRequest = {
-        email: req.body.email,
-        password: req.body.password
-       }
-       const admin = await Admin.findOne({ email: req.body.email });
-       if (!admin) {
-        return res.status(403).json({
-            message: "Admin not found"
-        });
-       } else {
+
+        const loginRequest = {
+            email: req.body.email,
+            password: req.body.password
+        }
+        const admin = await Admin.findOne({ email: req.body.email });
+        if (!admin) {
+            return res.status(403).json({
+                message: "Admin not found"
+            });
+        } else {
             const correctPassword = await bcrypt.compare(loginRequest.password, admin.password)
             if (correctPassword == false) {
                 return res.status(404).json({
@@ -94,20 +96,20 @@ const loginAdmin = async (req, res) => {
                     id: admin._id,
                     email: admin.email,
                     username: admin.username
-                }, process.env.TOKEN, {expiresIn: "45 mins"});
+                }, process.env.TOKEN, { expiresIn: "45 mins" });
 
                 const result = {
                     id: admin._id,
                     email: admin.email,
                     username: admin.username,
                     token: generatedToken
-                }                
+                }
                 return res.status(200).json({
                     message: "Login Successful",
                     data: result
                 });
             }
-       }
+        }
     } catch (error) {
         res.status(500).json({
             status: 'Failed',
@@ -118,22 +120,22 @@ const loginAdmin = async (req, res) => {
 
 const updateAdmin = async (req, res) => {
     try {
-       const id = req.params.id;
-       const admin = await Admin.findById(id);
-       if (!admin) {
-        return res.status(403).json({
-            message: "Admin not found"
+        const id = req.params.id;
+        const admin = await Admin.findById(id);
+        if (!admin) {
+            return res.status(403).json({
+                message: "Admin not found"
+            });
+        }
+        const adminData = {
+            username: req.body.username,
+            address: req.body.address
+        };
+        const updatedAdmin = await Admin.findByIdAndUpdate(id, adminData, { new: true });
+        return res.status(200).json({
+            message: "Admin updated successfully",
+            data: updatedAdmin
         });
-       } 
-       const adminData = {
-        username: req.body.username,
-        address: req.body.address
-       };
-       const updatedAdmin = await Admin.findByIdAndUpdate(id, adminData, { new: true });
-       return res.status(200).json({
-        message: "Admin updated successfully",
-        data: updatedAdmin
-       });
     } catch (error) {
         res.status(500).json({
             status: "Failed",
@@ -161,16 +163,16 @@ const adminPool = async (req, res) => {
 
 const deactivateAdmin = async (req, res) => {
     try {
-       const admin = await Admin.findOne({ username: req.params.username });
-       if (!admin) {
-        return res.status(403).json({
-            message: "Admin not found"
+        const admin = await Admin.findOne({ username: req.params.username });
+        if (!admin) {
+            return res.status(403).json({
+                message: "Admin not found"
+            });
+        }
+        await Admin.deleteOne({ username: req.params.username });
+        return res.status(200).json({
+            message: "Admin deleted Successful"
         });
-       } 
-       await Admin.deleteOne({ username: req.params.username });
-       return res.status(200).json({
-        message: "Admin deleted Successful"
-       });
     } catch (error) {
         res.status(500).json({
             status: 'Failed',
@@ -181,45 +183,47 @@ const deactivateAdmin = async (req, res) => {
 
 const changePassword = async (req, res) => {
     try {
-       const { oldPassword, newPassword } = req.body;
-       const admin = await Admin.findOne({ email: req.admin.email });
-       
-       const comparePassword = await bcrypt.compare(oldPassword, admin.password);
-       if (comparePassword !== true) {
-        return res.status(404).json({
-            message: 'Password Incorrect'
+        await adminChangePasswordSchema.validate(req.body, { abortEarly: false });
+
+        const { oldPassword, newPassword } = req.body;
+        const admin = await Admin.findOne({ email: req.admin.email });
+
+        const comparePassword = await bcrypt.compare(oldPassword, admin.password);
+        if (comparePassword !== true) {
+            return res.status(404).json({
+                message: 'Password Incorrect'
+            });
+        }
+        const saltPassword = bcrypt.genSaltSync(10);
+        const hashPassword = bcrypt.hashSync(newPassword, saltPassword);
+
+        if (newPassword === oldPassword) {
+            return res.status(404).json({
+                message: "Unauthorized"
+            });
+        }
+        admin.password = hashPassword;
+
+        sendEmail({
+            email: admin.email,
+            subject: "Password change alert",
+            message: "You have changed your password. If not you alert us"
         });
-       }
-       const saltPassword = bcrypt.genSaltSync(10);
-       const hashPassword = bcrypt.hashSync(newPassword, saltPassword);
+        const result = {
+            fullname: admin.fullname,
+            username: admin.username,
+            email: admin.email
+        }
+        await admin.save();
 
-       if (newPassword === oldPassword) {
-        return res.status(404).json({
-            message: "Unauthorized"
+        return res.status(200).json({
+            message: "Password changed successful",
+            data: result
         });
-       }
-       admin.password = hashPassword;
-
-       sendEmail({
-        email: admin.email,
-        subject: "Password change alert",
-        message: "You have changed your password. If not you alert us"
-       });
-       const result = {
-        fullname: admin.fullname,
-        username: admin.username,
-        email: admin.email
-       }
-       await admin.save();
-
-       return res.status(200).json({
-        message: "Password changed successful",
-        data: result
-       });
 
     } catch (error) {
         res.status(500).json({
-            status:  'Failed',
+            status: 'Failed',
             message: error.message
         });
     }
@@ -227,6 +231,8 @@ const changePassword = async (req, res) => {
 
 const forgotPassword = async (req, res) => {
     try {
+        await adminForgetPasswordSchema.validate(req.body, { abortEarly: false });
+
         const admin = await Admin.findOne({ email: req.body.email });
         if (!admin) {
             return res.status(404).json({
@@ -267,13 +273,13 @@ const restPassword = async (req, res) => {
                 message: 'Admin not found'
             });
         }
-        
+
         if (newPassword !== confirmPassword) {
             return res.status(403).json({
                 message: 'There is a difference in both password'
             });
         }
-        
+
         const saltPassword = bcrypt.genSaltSync(10);
         const hashPassword = bcrypt.hashSync(newPassword, saltPassword);
 
@@ -296,13 +302,14 @@ const restPassword = async (req, res) => {
     }
 };
 
-module.exports = { admin, 
-    verify, 
-    loginAdmin, 
-    adminPool, 
-    updateAdmin, 
-    deactivateAdmin, 
-    changePassword, 
-    forgotPassword, 
-    restPassword 
+module.exports = {
+    admin,
+    verify,
+    loginAdmin,
+    adminPool,
+    updateAdmin,
+    deactivateAdmin,
+    changePassword,
+    forgotPassword,
+    restPassword
 }
