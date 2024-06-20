@@ -19,7 +19,7 @@ const adminSchema = new mongoose.Schema({
         require: true
     },
     phoneno: {
-        type: String,
+        type: Number,
         require: true
     },
     address: {
